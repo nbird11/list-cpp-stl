@@ -114,4 +114,8 @@ This code is provided for educational purposes. See included license file for te
 
 ## Authors
 
-[Your names here]
+Nathan Bird  
+[nathanbirdka@gmail.com](mailto:nathanbirdka@gmail.com)
+
+Brock Hoskins  
+[]()
