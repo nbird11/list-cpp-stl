@@ -91,8 +91,9 @@ protected:
       std::cerr.setf(std::ios::fixed | std::ios::showpoint);
       std::cerr.precision(1);
       std::cerr << "There were "
+         << numSuccess << "/"
          << tests.size()
-         << " tests run for a success rate of: "
+         << " successful tests run for a success rate of: "
          << (successRate * 100.0) << "%\n";
 
    }
