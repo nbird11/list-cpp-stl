@@ -152,26 +152,15 @@ namespace custom
       //
       // Construct
       //
-      Node()
-      {
-         pNext = pPrev = nullptr;
-      }
-      Node(const T& data)
-      {
-         pNext = pPrev = nullptr;
-         this->data = data;
-      }
-      Node(T&& data)
-      {
-         pNext = pPrev = nullptr;
-         this->data = std::move(data);
-      }
+      Node() : pNext(nullptr), pPrev(nullptr) {}
+      Node(const T& data) : pNext(nullptr), pPrev(nullptr), data(data) {}
+      Node(T&& data) : pNext(nullptr), pPrev(nullptr), data(std::move(data)) {}
 
       //
       // Member Variables
       //
 
-      T data;             // user data
+      T data;            // user data
       Node* pNext;       // pointer to next node
       Node* pPrev;       // pointer to previous node
    };
@@ -388,13 +377,31 @@ namespace custom
    template <typename T, typename A>
    void list<T, A>::push_back(const T& data)
    {
+      list<T, A>::Node* pNew(new Node(data));
 
+      pNew->pPrev = pTail;
+      if (pTail)
+         pTail->pNext = pNew;
+      else
+         pHead = pNew;
+
+      pTail = pNew;
+      numElements++;
    }
 
    template <typename T, typename A>
    void list<T, A>::push_back(T&& data)
    {
+      list<T, A>::Node* pNew(new Node(std::move(data)));
 
+      pNew->pPrev = pTail;
+      if (pTail)
+         pTail->pNext = pNew;
+      else
+         pHead = pNew;
+
+      pTail = pNew;
+      numElements++;
    }
 
    /*********************************************
@@ -407,13 +414,31 @@ namespace custom
    template <typename T, typename A>
    void list<T, A>::push_front(const T& data)
    {
+      list<T, A>::Node* pNew(new Node(data));
 
+      pNew->pNext = pHead;
+      if (pHead)
+         pHead->pPrev = pNew;
+      else
+         pTail = pNew;
+
+      pHead = pNew;
+      numElements++;
    }
 
    template <typename T, typename A>
    void list<T, A>::push_front(T&& data)
    {
+      list<T, A>::Node* pNew(new Node(std::move(data)));
 
+      pNew->pNext = pHead;
+      if (pHead)
+         pHead->pPrev = pNew;
+      else
+         pTail = pNew;
+
+      pHead = pNew;
+      numElements++;
    }
 
 

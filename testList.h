@@ -85,14 +85,14 @@ public:
       test_back_standardWrite();
       
       // Insert
-      //test_pushback_empty();
-      //test_pushback_standard();
-      //test_pushback_moveEmpty();
-      //test_pushback_moveStandard();
-      //test_pushfront_empty();
-      //test_pushfront_standard();
-      //test_pushfront_moveEmpty();
-      //test_pushfront_moveStandard();
+      test_pushback_empty();
+      test_pushback_standard();
+      test_pushback_moveEmpty();
+      test_pushback_moveStandard();
+      test_pushfront_empty();
+      test_pushfront_standard();
+      test_pushfront_moveEmpty();
+      test_pushfront_moveStandard();
       //test_insert_empty();
       //test_insert_standardFront();
       //test_insert_standardMiddle();
