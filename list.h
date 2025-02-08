@@ -47,24 +47,20 @@ namespace custom
 
       list(const A& a = A())
          : alloc(a), numElements(0), pHead(nullptr), pTail(nullptr)
+      {}
+      list(list<T, A>& rhs, const A& a = A()) : list(a)
       {
-      }
-      list(list<T, A>& rhs, const A& a = A())
-         : alloc(a)
-      {
-         *this = rhs;
+         *this = rhs;  // rely on assignment
       }
       list(list<T, A>&& rhs, const A& a = A());
       list(size_t num, const T& t, const A& a = A());
       list(size_t num, const A& a = A());
-      list(const std::initializer_list<T>& il, const A& a = A())
-         : alloc(a)
+      list(const std::initializer_list<T>& il, const A& a = A()) : list(a)
       {
-         *this = il;
+         *this = il;  // rely on assignment
       }
       template <class Iterator>
-      list(Iterator first, Iterator last, const A& a = A())
-         : alloc(a)
+      list(Iterator first, Iterator last, const A& a = A()) : list(a)
       {
          while (first != last)
          {
@@ -238,7 +234,7 @@ namespace custom
       // two friends who need to access p directly
       friend iterator list<T, A>::insert(iterator it, const T& data);
       friend iterator list<T, A>::insert(iterator it, T&& data);
-      friend iterator list<T, A>::erase(const iterator& it);
+      friend iterator list<T, A>::erase (const iterator& it);
 
    private:
 
@@ -250,11 +246,10 @@ namespace custom
     * Create a list initialized to a value
     ****************************************/
    template <typename T, typename A>
-   list<T, A>::list(size_t num, const T& t, const A& a)
-      : alloc(a), numElements(num)
+   list<T, A>::list(size_t num, const T& t, const A& a) : list(a)
    {
-      pHead = pTail = new list<T, A>::Node();
-      pHead->pNext = pTail->pNext = pHead->pPrev = pTail->pPrev = nullptr;
+      for (size_t i = 0; i < num; i++)
+         push_back(t);
    }
 
    /*****************************************
@@ -262,11 +257,23 @@ namespace custom
     * Create a list initialized to a value
     ****************************************/
    template <typename T, typename A>
-   list<T, A>::list(size_t num, const A& a)
+   list<T, A>::list(size_t num, const A& a) : list(a)
    {
-      numElements = 99;
-      pHead = pTail = new list<T, A>::Node();
-      pHead->pNext = pTail->pNext = pHead->pPrev = pTail->pPrev = nullptr;
+      if (num)
+      {
+         // Can't use push_back() because a T is not initialized.
+         // Would be less efficient to initialize a T here and then copy it.
+         pHead = new Node();
+         Node* p = pHead;
+         for (size_t i = 1; i < num; i++)
+         {
+            p->pNext = new Node();
+            p->pNext->pPrev = p;
+            p = p->pNext;
+         }
+         pTail = p;
+         numElements = num;
+      }
    }
 
    /*****************************************
@@ -355,7 +362,7 @@ namespace custom
          else
             this->pHead = this->pTail = nullptr;
       }
-      
+
       return *this;
    }
 
@@ -369,6 +376,7 @@ namespace custom
    template <typename T, typename A>
    list<T, A>& list<T, A>::operator = (const std::initializer_list<T>& rhs)
    {
+      // `const std::initializer_list<T>::value_type*` is the same as `std::initializer_list<T>::iterator`
       const std::initializer_list<T>::value_type* itRHS = rhs.begin();
       list<T, A>::iterator itLHS = begin();
 
@@ -389,6 +397,8 @@ namespace custom
             ++itRHS;
          }
       }
+      // Using size() here becuase `initializer_list::iterator` (or 
+      //   `const initializer_list::value_type*`) does not have empty().
       else if (rhs.size() == 0)
       {
          clear();
@@ -415,7 +425,7 @@ namespace custom
          else
             this->pHead = this->pTail = nullptr;
       }
-      
+
       return *this;
    }
 
@@ -453,7 +463,7 @@ namespace custom
    template <typename T, typename A>
    void list<T, A>::push_back(const T& data)
    {
-      list<T, A>::Node* pNew(new Node(data));
+      list<T, A>::Node* pNew = new Node(data);
 
       pNew->pPrev = pTail;
       if (pTail)
