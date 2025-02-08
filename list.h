@@ -58,17 +58,19 @@ namespace custom
       list(size_t num, const T& t, const A& a = A());
       list(size_t num, const A& a = A());
       list(const std::initializer_list<T>& il, const A& a = A())
+         : alloc(a)
       {
-         numElements = 99;
-         pHead = pTail = new list<T, A>::Node();
-         pHead->pNext = pTail->pNext = pHead->pPrev = pTail->pPrev = nullptr;
+         *this = il;
       }
       template <class Iterator>
       list(Iterator first, Iterator last, const A& a = A())
+         : alloc(a)
       {
-         numElements = 99;
-         pHead = pTail = new list<T, A>::Node();
-         pHead->pNext = pTail->pNext = pHead->pPrev = pTail->pPrev = nullptr;
+         while (first != last)
+         {
+            push_back(*first);
+            ++first;
+         }
       }
       ~list()
       {
@@ -290,7 +292,7 @@ namespace custom
     *     COST   : O(n) with respect to the size of the LHS
     *********************************************/
    template <typename T, typename A>
-   list<T, A>& list<T, A>:: operator = (list<T, A>&& rhs)
+   list<T, A>& list<T, A>::operator = (list<T, A>&& rhs)
    {
       clear();
       swap(rhs);
@@ -307,10 +309,10 @@ namespace custom
    template <typename T, typename A>
    list<T, A>& list<T, A>:: operator = (list<T, A>& rhs)
    {
-      auto itRHS = rhs.begin();
-      auto itLHS = begin();
+      list<T, A>::iterator itRHS = rhs.begin();
+      list<T, A>::iterator itLHS = begin();
 
-      // Fill existing nodes
+      // Fill existing nodes.
       while (itRHS != rhs.end() && itLHS != end())
       {
          *itLHS = *itRHS;
@@ -318,7 +320,7 @@ namespace custom
          ++itLHS;
       }
 
-      // Add new nodes
+      // Create new nodes if RHS is bigger.
       if (itRHS != rhs.end())
       {
          while (itRHS != rhs.end())
@@ -332,12 +334,12 @@ namespace custom
          clear();
       }
 
-      // Remove extra nodes
+      // Remove extra nodes if RHS is smaller.
       else if (itLHS != end())
       {
-         auto p = itLHS.p;
-         auto pTail = p->pPrev;
-         auto pNext = p->pNext;
+         list<T, A>::Node* p = itLHS.p;
+         list<T, A>::Node* pTail = p->pPrev;
+         list<T, A>::Node* pNext = p->pNext;
          while (p != nullptr)
          {
             pNext = p->pNext;
@@ -353,8 +355,8 @@ namespace custom
          else
             this->pHead = this->pTail = nullptr;
       }
-      else
-         return *this;
+      
+      return *this;
    }
 
    /**********************************************
@@ -365,8 +367,55 @@ namespace custom
     *     COST   : O(n) with respect to the number of nodes
     *********************************************/
    template <typename T, typename A>
-   list<T, A>& list<T, A>:: operator = (const std::initializer_list<T>& rhs)
+   list<T, A>& list<T, A>::operator = (const std::initializer_list<T>& rhs)
    {
+      const std::initializer_list<T>::value_type* itRHS = rhs.begin();
+      list<T, A>::iterator itLHS = begin();
+
+      // Fill existing nodes.
+      while (itRHS != rhs.end() && itLHS != end())
+      {
+         *itLHS = *itRHS;
+         ++itRHS;
+         ++itLHS;
+      }
+
+      // Create new nodes if RHS is bigger.
+      if (itRHS != rhs.end())
+      {
+         while (itRHS != rhs.end())
+         {
+            push_back(*itRHS);
+            ++itRHS;
+         }
+      }
+      else if (rhs.size() == 0)
+      {
+         clear();
+      }
+
+      // Remove extra nodes if RHS is smaller.
+      else if (itLHS != end())
+      {
+         list<T, A>::Node* p = itLHS.p;
+         list<T, A>::Node* pTail = p->pPrev;
+         list<T, A>::Node* pNext = p->pNext;
+         while (p != nullptr)
+         {
+            pNext = p->pNext;
+            delete p;
+            p = pNext;
+            numElements--;
+         }
+         if (pTail)
+         {
+            pTail->pNext = nullptr;
+            this->pTail = pTail;
+         }
+         else
+            this->pHead = this->pTail = nullptr;
+      }
+      
       return *this;
    }
 
@@ -380,11 +429,12 @@ namespace custom
    template <typename T, typename A>
    void list<T, A>::clear()
    {
-      auto p = pHead;
+      list<T, A>::Node* p = pHead;
+      list<T, A>::Node* pNext;
 
       while (p)
       {
-         auto pNext = p->pNext;
+         pNext = p->pNext;
          delete p;
          p = pNext;
       }
@@ -480,7 +530,7 @@ namespace custom
    {
       if (!empty())
       {
-         auto newTail = pTail->pPrev;
+         list<T, A>::Node* newTail = pTail->pPrev;
          erase(pTail);
          pTail = newTail;
       }
@@ -498,7 +548,7 @@ namespace custom
    {
       if (!empty())
       {
-         auto newHead = pHead->pNext;
+         list<T, A>::Node* newHead = pHead->pNext;
          erase(pHead);
          pHead = newHead;
       }
@@ -547,7 +597,7 @@ namespace custom
    template <typename T, typename A>
    typename list<T, A>::iterator list<T, A>::erase(const list<T, A>::iterator& it)
    {
-      auto itNext = end();
+      list<T, A>::iterator itNext = end();
 
       if (!it.p)
       {
@@ -605,7 +655,7 @@ namespace custom
          numElements++;
          return iterator(pNew);
       }
-      
+
       // Insert in the middle of the list.
       pNew->pPrev = it.p->pPrev;
       pNew->pNext = it.p;

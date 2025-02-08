@@ -33,12 +33,12 @@ public:
       //test_construct_sizeZero();
       //test_construct_sizeThree();
       //test_construct_sizeThreeFill();
-      //test_constructCopy_empty();
-      //test_constructCopy_standard();
-      //test_constructMove_empty();
-      //test_constructMove_standard();
-      //test_constructInit_empty();
-      //test_constructInit_standard();
+      test_constructCopy_empty();
+      test_constructCopy_standard();
+      test_constructMove_empty();
+      test_constructMove_standard();
+      test_constructInit_empty();
+      test_constructInit_standard();
       //test_constructRange_empty();
       //test_constructRange_standard();
       test_destructor_empty();
@@ -50,10 +50,10 @@ public:
       test_assign_emptyToStandard();
       test_assign_smallToBig();
       test_assign_bigToSmall();
-      //test_assignInit_empty();
-      //test_assignInit_sameSize();
-      //test_assignInit_rightBigger();
-      //test_assignInit_leftBigger();
+      test_assignInit_empty();
+      test_assignInit_sameSize();
+      test_assignInit_rightBigger();
+      test_assignInit_leftBigger();
       test_assignMove_emptyToEmpty();
       test_assignMove_standardToEmpty();
       test_assignMove_emptyToStandard();
@@ -864,7 +864,7 @@ public:
       std::initializer_list<Spy> il{ Spy(11),Spy(26),Spy(31) };
       Spy::reset();
       // exercise
-      l = il;   // l = {Spy(11), Spy(26), Spy(31) }
+      l = il;   // l = { Spy(11), Spy(26), Spy(31) }
       // verify
       assertUnit(Spy::numAssign() == 3);     // [11][26][31] are assigned over
       assertUnit(Spy::numAlloc() == 0);
